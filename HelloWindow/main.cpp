@@ -7,6 +7,7 @@ constexpr int  WINDOW_HEIGHT_PX = 600;
 const char* WINDOW_TITLE {"HelloWindow"};
 
 void framebuffer_size_callback(GLFWwindow* window, int new_width, int new_height);
+void processInput(GLFWwindow* window);
 
 int main() {
     glfwInit();                                                      // 1. Initializing GLFW
@@ -38,6 +39,14 @@ int main() {
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     
     while (!glfwWindowShouldClose(window)) {
+        // Input Handling
+        processInput(window);
+        
+        // Rendering commands
+        glClearColor(0.2f, 0.3f, 0.4f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        // Check and call events and swap the buffers
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
@@ -49,4 +58,9 @@ int main() {
 
 void framebuffer_size_callback(GLFWwindow* window, int new_width, int new_height) {
     glViewport(0, 0, new_width, new_height);
+}
+
+void processInput(GLFWwindow* window) {
+    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+        glfwSetWindowShouldClose(window, true);
 }
