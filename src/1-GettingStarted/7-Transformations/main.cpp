@@ -6,6 +6,9 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 
+void framebuffer_size_callback(GLFWwindow *window, int width, int height);
+void process_input(GLFWwindow *window);
+
 const unsigned int WINDOW_WIDTH  = 800;
 const unsigned int WINDWO_HEIGHT = 600;
 
@@ -22,7 +25,7 @@ int main() {
 #endif
 
   // glfw window creation 
-  GLFWwindow *window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_WIDTH, "Transformations", NULL, NULL);
+  GLFWwindow *window = glfwCreateWindow(WINDOW_WIDTH, WINDWO_HEIGHT, "Transformations", NULL, NULL);
   if (window == nullptr) {
     std::cerr << "Faild To Create GLFW Window" << std::endl;
     glfwTerminate();
@@ -30,12 +33,17 @@ int main() {
   }
 
   glfwMakeContextCurrent(window);
-  // TODO: Frame buffer size callback
+  glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
   if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
     std::cerr << "Faild To Initialize GLAD" << std::endl;
     return -1;
   }
+
+  // Build and Compiler Our Shader Program
+  // ----------------------------
+  Shader ourShader("./resources/shaders/vertex.vert", "./resources/shaders/fragment.frag");
+  // ----------------------------
 
   // vertex data 
   float vertices[] = {
@@ -92,6 +100,7 @@ int main() {
   // ----------------------------
 
   unsigned int texture1, texture2;
+  
   // texture 1
   glGenTextures(1, &texture1); 
   glBindTexture(GL_TEXTURE_2D, texture1); 
@@ -104,5 +113,79 @@ int main() {
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
+  // load image, create texture, generate mipmaps
+  int width, height, nr_channels;
+  // TODO: stbi_flip_onload (why?)
+
+  unsigned char *data = stbi_load("./resources/textures/container.jpg", &width, &height, &nr_channels, 0);
+  if (data) {
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+    glGenerateMipmap(GL_TEXTURE_2D);
+  } else {
+    std::cerr << "Failed To Load Texture" << std::endl;
+    return -1;
+  }
+  stbi_image_free(data);
+
+  // texture 2
+  glGenTextures(1, &texture2);
+  glBindTexture(GL_TEXTURE_2D, texture2);
+
+  // setting texture "wrapping" parameters
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+  // setting texture "filtering" parameters
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+  // load image, create texture, generate mipmaps
+  data = stbi_load("./resources/textures/awesomeface.png", &width, &height, &nr_channels, 0);
+  if (data) {
+    // note that the awesomeface.png has transparency and thus an alpha channel, so make sure to tell OpenGL the data type is of GL_RGBA
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+    glGenerateMipmap(GL_TEXTURE_2D);
+  } else {
+    std::cerr << "Failed To Load Texture" << std::endl;
+    return -1;
+  }
+  stbi_image_free(data);
+
+  ourShader.use(); 
+
+  // Render Loop
+  // ----------------------------
+  while (!glfwWindowShouldClose(window)) {
+    // process input
+    process_input(window);
+
+    // render 
+    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    // bind and activate textures
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texture1); 
+
+    // render container
+    glBindVertexArray(VAO);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+    glfwSwapBuffers(window);
+    glfwPollEvents();
+  }
+  // ----------------------------
+
+
+  glfwTerminate();
   return 0;
+}
+
+void process_input(GLFWwindow *window) {
+  if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+    glfwSetWindowShouldClose(window, true);
+}
+
+void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
+  glViewport(0, 0, width, height);
 }

@@ -1,7 +1,6 @@
 #ifndef SHADER_H
 #define SHADER_H
 
-#include <cinttypes>
 #include <glad/glad.h>
 #include <ios>
 #include <string>
@@ -26,8 +25,8 @@ class Shader {
       fragment_shader_ifs.exceptions(std::ifstream::failbit | std::ifstream::badbit);
 
       try {
-        vertex_shader_ifs.open(vertex_shader_code, std::ios_base::in);
-        fragment_shader_ifs.open(fragment_shader_code, std::ios_base::in);
+        vertex_shader_ifs.open(vertex_shader_file_path, std::ios_base::in);
+        fragment_shader_ifs.open(fragment_shader_file_path, std::ios_base::in);
 
         std::stringstream vertex_shader_sstream, fragment_shader_sstream;
         vertex_shader_sstream << vertex_shader_ifs.rdbuf();
@@ -36,10 +35,10 @@ class Shader {
         vertex_shader_code   = vertex_shader_sstream.str();
         fragment_shader_code = fragment_shader_sstream.str(); 
 
-        std::cout << "SUCCESS::SHADER::FILE_READY_SUCCESSFULLY" << std::endl;
+        std::cout << "SUCCESS::SHADER::FILE_READ_SUCCESSFULLY" << std::endl;
 
       } catch (std::ifstream::failure& exception) {
-        std::cerr << "ERROR::SHADER::FILE_NOT_READ_SUCCESSFULLY" << exception.what() << std::endl;
+        std::cerr << "ERROR::SHADER::FILE_NOT_READ_SUCCESSFULLY " << exception.what() << std::endl;
       }
 
       const char* vertex_shader_csource_code   = vertex_shader_code.c_str();
