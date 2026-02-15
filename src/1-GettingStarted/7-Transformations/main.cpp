@@ -115,7 +115,7 @@ int main() {
 
   // load image, create texture, generate mipmaps
   int width, height, nr_channels;
-  // TODO: stbi_flip_onload (why?)
+  stbi_set_flip_vertically_on_load(true);
 
   unsigned char *data = stbi_load("./resources/textures/container.jpg", &width, &height, &nr_channels, 0);
   if (data) {
@@ -151,7 +151,9 @@ int main() {
   }
   stbi_image_free(data);
 
-  ourShader.use(); 
+  ourShader.use();  // must activate/use the shader before setting uniforms
+  glUniform1i(glGetUniformLocation(ourShader.shader_program, "texture1"), 0);
+  glUniform1i(glGetUniformLocation(ourShader.shader_program, "texture2"), 1);
 
   // Render Loop
   // ----------------------------
@@ -163,17 +165,32 @@ int main() {
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    // bind and activate textures
+    // bind and activate textures 0
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture1); 
 
+    // bind and activate texture 1 
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, texture2);
+    
+
     // render container
+    ourShader.use();
     glBindVertexArray(VAO);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
     glfwSwapBuffers(window);
     glfwPollEvents();
   }
+  // ----------------------------
+
+  // De-allocating Resources
+  // ----------------------------
+
+  glDeleteVertexArrays(1, &VAO);
+  glDeleteBuffers(1, &VBO);
+  glDeleteBuffers(1, &EBO);
+  
   // ----------------------------
 
 

@@ -10,7 +10,7 @@
 
 class Shader {
   public:
-    unsigned int shader;
+    unsigned int shader_program;
 
     // Constructor
     Shader(const char* vertex_shader_file_path, const char* fragment_shader_file_path) {
@@ -59,11 +59,11 @@ class Shader {
       checkCompileErrors(fragment_shader, "FRAGMENT");
 
       // shader program
-      shader = glCreateProgram();
-      glAttachShader(shader, vertex_shader);
-      glAttachShader(shader, fragment_shader);
-      glLinkProgram(shader);
-      checkCompileErrors(shader, "PROGRAM");
+      shader_program = glCreateProgram();
+      glAttachShader(shader_program, vertex_shader);
+      glAttachShader(shader_program, fragment_shader);
+      glLinkProgram(shader_program);
+      checkCompileErrors(shader_program, "PROGRAM");
 
       // delete vertex and fragment shader 
       glDeleteShader(vertex_shader);
@@ -71,7 +71,7 @@ class Shader {
     }
 
     void use() {
-      glUseProgram(shader);
+      glUseProgram(shader_program);
     }
 
   private:
